@@ -1,0 +1,77 @@
+name: build
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the Git repository
+        uses: actions/checkout@v4
+      - name: Build
+        uses: Eeems-Org/remarkable-nuitka-build-action@v2
+        with:
+          main: myapp.py
+          python_version: '3.10'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: myapp
+          path: dist/myapp.bin
+          if-no-files-found: error
+  package:
+    name: Package
+    runs-on: ubuntu-20.04
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: myapp
+      - name: Build package
+        uses: toltec-dev/build-action@v1
+      - name: Save packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: dist/rm*/*.ipk
+      - name: Save repo
+        uses: actions/upload-artifact@v3
+        with:
+          name: rmall
+          path: dist/rmall
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [package]
+    steps:
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: rmall
+      - uses: Eeems-Org/run-in-remarkable-action@v1
+        with:
+          setup: |
+            echo "src/gz local-rmall file:///opt/tmp/src" > /opt/etc/opkg.conf.d/16-local.conf
+            unit_path=/etc/systemd/system/rm2fb.service.d/99-never-fail.conf
+            mkdir -p "$(dirname "$unit_path")"
+            echo "[Unit]" > "$unit_path"
+            echo "ExecStart=" >> "$unit_path"
+            echo "ExecStart=/bin/true" >> "$unit_path"
+          run: |
+            echo Y | toltecctl generate-opkg-conf
+            opkg update
+            opkg install my-app
+            # Add steps here to test app
+            opkg remove my-app
+          path: ${{ steps.download.outputs.download-path }}
