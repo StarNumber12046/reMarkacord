@@ -26,16 +26,20 @@ def server_click_hook(rm: ReMarkable, clicked):
     print("Running server_click. ")
     print(clicked)
     rm.remove("guilds")
-    for item in rm.screen:
-        if item.id.startswith("guild_"):
-            rm.remove(item.id)
-    # for server in servers:
-    #     rm.remove(f"guild_{server['id']}")
-    # for server in servers:
-    #     if f'guild_{server["id"]}' == clicked[0]:
-    #         print(server)
-    #         channel_list(rm, server["id"])
-    #         break
+    # THIS CODE IS BUGGED
+    # for item in rm.screen:
+    #     print(item.id)
+    #     if item.id.startswith("guild_"):
+    #         rm.remove(item.id)
+    
+    for server in servers:
+        rm.remove(f"guild_{server['id']}")
+    for server in servers:
+        
+        if f'guild_{server["id"]}' == clicked[0]:
+            print(server)
+            channel_list(rm, server["id"])
+            break
     return None
 
 
@@ -65,7 +69,8 @@ def logged_in(rm: ReMarkable, hooks: list[callable]):
                 value=server["name"],
             )
         )
-        
+    for item in rm.screen:
+        print(item.id)
 
 def channel_list(rm: ReMarkable, server_id: int):
     rm.add(
