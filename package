@@ -10,8 +10,7 @@ installdepends=(simple)
 
 source=(
     myapp.bin
-    myapp.oxide
-    myapp.draft
+    remarkacord.draft
 )
 sha256sums=(
     SKIP
@@ -21,6 +20,5 @@ sha256sums=(
 
 package() {
     install -D -m 755 -t "$pkgdir"/opt/bin/reMarkacord "$srcdir"/myapp.bin
-    install -D -m 655 -t "$pkgdir"/opt/usr/share/applications/ "$srcdir"/myapp.oxide
     install -D -m 655 -t "$pkgdir"/opt/etc/draft/ "$srcdir"/remarkacord.draft
 }
