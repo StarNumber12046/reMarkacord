@@ -26,7 +26,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: myapp
-          path: dist/myapp.bin
+          path: dist/reMarkacord.bin
           if-no-files-found: error
   package:
     name: Package

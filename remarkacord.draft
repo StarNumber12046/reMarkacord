@@ -1,0 +1,7 @@
+# Copyright (c) 2020 The Toltec Contributors
+# SPDX-License-Identifier: MIT
+
+name=reMarkacord
+desc=Discord client using simple
+call=/opt/bin/reMarkacord
+term=:

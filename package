@@ -1,23 +1,26 @@
-pkgnames=(my-app)
-pkgdesc="An example application package"
-url=https://example.com
+pkgnames=(reMarkacord)
+pkgdesc="Discord client using simple"
+url=https://github.com/StarNumber12046/reMarkacord
 pkgver=0.0.1-1
 timestamp=2020-10-09T18:15Z
 section=util
-maintainer="My Name <me@example.com>"
+maintainer="StarNumber <starnumber.official12046@gmail.com>"
 license=MIT
 installdepends=(simple)
 
 source=(
-    myapp.bin
+    reMarkacord.bin
     myapp.oxide
+    myapp.draft
 )
 sha256sums=(
+    SKIP
     SKIP
     SKIP
 )
 
 package() {
-    install -D -m 755 -t "$pkgdir"/opt/bin/myapp "$srcdir"/myapp.bin
+    install -D -m 755 -t "$pkgdir"/opt/bin/reMarkacord "$srcdir"/reMarkacord.bin
     install -D -m 655 -t "$pkgdir"/opt/usr/share/applications/ "$srcdir"/myapp.oxide
+    install -D -m 655 -t "$pkgdir"/opt/etc/draft/ "$srcdir"/remarkacord.draft
 }
