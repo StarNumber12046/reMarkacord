@@ -1,3 +1,4 @@
 -r requirements.txt
 rmkit-sim==0.0.2
+requests
 okp==0.0.54

@@ -3,5 +3,5 @@
 
 name=reMarkacord
 desc=Discord client using simple
-call=/opt/bin/reMarkacord
+call=/opt/bin/reMarkacord.bin
 term=:

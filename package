@@ -9,7 +9,7 @@ license=MIT
 installdepends=(simple)
 
 source=(
-    myapp.bin
+    reMarkacord.bin
     remarkacord.draft
 )
 sha256sums=(
@@ -18,6 +18,6 @@ sha256sums=(
 )
 
 package() {
-    install -D -m 755 -t "$pkgdir"/opt/bin/reMarkacord "$srcdir"/myapp.bin
+    install -D -m 755 -t "$pkgdir"/opt/bin/ "$srcdir"/myapp.bin
     install -D -m 655 -t "$pkgdir"/opt/etc/draft/ "$srcdir"/remarkacord.draft
 }
