@@ -6,7 +6,7 @@ from .scenes import logged_in, not_logged_in
 from carta import ReMarkable, Widget
 
 
-def quit_hook(rm: ReMarkable, clicked):
+def quit_hook(rm: ReMarkable, clicked, config: Config):
     print(clicked)
     if clicked and clicked[0] == "back":
             print("Quitting...")
@@ -33,32 +33,11 @@ def main():
 
     rm.eclear()
 
-    button = Widget(
-        id="back",
-        typ="button",
-        value="back",
-        justify="left",
-        x="0",
-        y="0",
-    )
-    title = Widget(
-        id="title",
-        typ="label",
-        value="Discord",
-        justify="center",
-        x= "50%",
-        y= "20",
-        fontsize="50",
-    )
-    
     if not config.is_logged_in():
-        not_logged_in(rm, click_hooks)
+        not_logged_in(rm, click_hooks, config)
     else:
-        logged_in(rm, click_hooks)
-        
+        logged_in(rm, click_hooks, config)
 
-    rm.add(title)
-    rm.add(button)
     while True:
         print("_________________________________________")
         print(click_hooks)
@@ -66,5 +45,5 @@ def main():
     
         for hook in click_hooks:
             print("Calling "+ hook.__name__)
-            hook(rm, clicked)
+            hook(rm, clicked, config)
 
