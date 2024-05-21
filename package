@@ -15,7 +15,6 @@ source=(
 sha256sums=(
     SKIP
     SKIP
-    SKIP
 )
 
 package() {
