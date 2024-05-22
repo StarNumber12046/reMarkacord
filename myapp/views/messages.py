@@ -27,7 +27,6 @@ class MessagesView(BaseView):
         self.pages = self.generate_pages(self.messages)
 
     def generate_pages(self, messages):
-        max_messages_per_page = (1400-100)//50
         pages_list = []
         current_page = []
         total_height = 0
@@ -35,7 +34,7 @@ class MessagesView(BaseView):
             text = f"@{message.author_username}: {message.content}"
             lines = textwrap.wrap(text, width=1400//30)
             height = len(lines)*30
-            if total_height + height > 1400:
+            if total_height + height > 1300:
                 pages_list.append(current_page)
                 current_page = []
                 total_height = 0
@@ -99,7 +98,18 @@ class MessagesView(BaseView):
         self.page = page
         self.paginate(len(self.pages), self.page)
 
-        last_height = 100
+        last_height = 300
+        new_msgbar = Widget(
+            id="new_msgbar",
+            typ="textinput",
+            justify="left",
+            x="10",
+            y="200",
+            fontsize="30",
+            width="90%",
+            value="",
+        )
+        self.rm.add(new_msgbar)
         for msg_index, message in enumerate(messages_for_page):
 
             for index, line in enumerate(message):
@@ -123,21 +133,16 @@ class MessagesView(BaseView):
         if clicked and clicked[0] == "msg_next":
             self.rm.reset()
             
-            view = MessagesView(self.rm, self.current_view, {"page":self.page+1, "current_channel": self.current_channel, "current_server": self.additional_args["current_server"]})
-            self.current_view.clear()
-            self.current_view.append(view)
-            view.display()
+            self.additional_args["page"] = self.page + 1
+            self.display()
             return None
     
     def message_back_hook(self, clicked):
         
         if clicked and clicked[0] == "msg_prev":
             self.rm.reset()
-            view = MessagesView(self.rm, self.current_view, {"page":self.page-1, "current_channel": self.current_channel, "current_server": self.additional_args["current_server"]})
-            
-            self.current_view.clear()
-            self.current_view.append(view)
-            view.display()
+            self.additional_args["page"] = self.page - 1
+            self.display()
             return None
     
     def go_back(self, clicked):
