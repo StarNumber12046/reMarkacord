@@ -20,6 +20,7 @@ class MessagesView(BaseView):
         self.current_channel = self.additional_args["current_channel"]
         self.hooks.append(self.message_back_hook)
         self.page = 1
+        self.hooks.append(self.send_message_hook)
         self.hooks.append(self.message_next_hook)
         self.hooks.append(self.go_back)
         self.client = Client(Config().get("DISCORD_TOKEN"))
@@ -107,7 +108,7 @@ class MessagesView(BaseView):
             y="200",
             fontsize="30",
             width="90%",
-            value="",
+            value="Hi from reMarkable!",
         )
         self.rm.add(new_msgbar)
         for msg_index, message in enumerate(messages_for_page):
@@ -127,7 +128,14 @@ class MessagesView(BaseView):
                 )
             last_height += 10
 
-
+    def send_message_hook(self, clicked):
+        print("EEEEEEE")
+        if clicked and clicked[0].strip() == "new_msgbar":
+            print("Sending message...")
+            print(self.client.send_message(self.current_channel, clicked[1]))
+            self.rm.reset()
+            self.additional_args["page"] = 1
+            self.display()
     
     def message_next_hook(self, clicked):
         if clicked and clicked[0] == "msg_next":

@@ -41,4 +41,11 @@ class Client(object):
             raise RuntimeError("Failed to get messages")
         messages = [Message(item["id"], item["content"], item["author"]) for item in json_response]
         return messages
-        
+    
+    def send_message(self, channel_id, content):
+        response = requests.post(f"{BASE_URL}/channels/{channel_id}/messages", headers=HEADERS | {"authorization": self.token}, json={"content": content, "flags": 0})
+        json_response = response.json()
+        if response.status_code != 200:
+            print(json_response)
+            raise RuntimeError("Failed to send message")
+        return json_response

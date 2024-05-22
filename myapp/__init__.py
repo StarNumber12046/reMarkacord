@@ -1,8 +1,12 @@
 import argparse
 import os
 
+import requests
+
+from myapp.views.error import ErrorView
 from myapp.views.guilds import GuildsView
 from myapp.views.login import LoginView
+from myapp.views.nointernet import NoInternetView
 from .config import Config
 
 from carta import ReMarkable
@@ -35,6 +39,17 @@ def main():
 
     rm.eclear()
     current_view = []
+    try:
+        requests.get("https://discord.com")
+    except:
+        current_view.clear()
+        view = NoInternetView(rm, current_view)
+        rm.reset()
+        current_view.append(view)
+        view.display()
+        rm.display()
+        return
+        
     if not config.is_logged_in():
         current_view.clear()
         view = LoginView(rm, current_view)
@@ -49,11 +64,17 @@ def main():
 
     while True:
         print("_________________________________________")
+        try:
+            clicked = rm.display()
 
-        clicked = rm.display()
-        rm.screen
-        quit_hook(clicked)
-        
-        current_view[0].handle_buttons(clicked)
-        __import__("time").sleep(2)
+            quit_hook(clicked)
+            
+            current_view[0].handle_buttons(clicked)
+        except:
+            current_view.clear()
+            view = ErrorView(rm, current_view)
+            rm.reset()
+            current_view.append(view)
+            view.display()
+
 
