@@ -33,12 +33,12 @@ class ChannelsView(BaseView):
         total_height = 0
         for channel in channels:
             text = f"{channel['name']}"
-            if total_height + 30 > 1400:
+            if total_height + 50 > 1650:
                 pages_list.append(current_page)
                 current_page = []
                 total_height = 0
             current_page.append((text, channel["id"]))
-            total_height += 30
+            total_height += 50
         if current_page:
             pages_list.append(current_page)
         return pages_list
@@ -99,39 +99,22 @@ class ChannelsView(BaseView):
         client = Client(Config().get("DISCORD_TOKEN"))
         self.page = self.additional_args.get("page", 1)
         channels = self.pages[self.page-1]
-        
+        print("Channels n°", len(channels))
         self.paginate(len(self.pages), self.page)
-
+        height = 100
         for channel in channels:
+            height += 50
             self.rm.add(
                 Widget(
                     id=f"channel_{channel[1]}",
                     typ="button",
                     justify="center",
                     x="50%",
-                    y=f"{100+50*channels.index(channel)}",
+                    y=f"{height}",
                     fontsize="30",
                     value=channel[0],
                 )
             )
-        base_widget =             Widget(
-                id="channel_back",
-                typ="button",
-                value="<= Back",
-                justify="right",
-                x=f"0",
-                y=f"0", 
-            )
-        self.rm.add(
-            Widget(
-                id="channel_back",
-                typ="button",
-                value="<=",
-                justify="left",
-                x=f"{1404-50}",
-                y=f"10", # At the end of the list
-            )
-        )
     
     def channel_next_hook(self, clicked):
         print(clicked)
@@ -139,7 +122,7 @@ class ChannelsView(BaseView):
             print("Hi *4!")
             self.rm.reset()
             
-            view = ChannelsView(self.rm, self.current_view, {"base":(self.page+1)*34, "current_server": self.current_server})
+            view = ChannelsView(self.rm, self.current_view, {"page":(self.page+1), "current_server": self.current_server})
             self.current_view.clear()
             self.current_view.append(view)
             view.display()
@@ -148,7 +131,7 @@ class ChannelsView(BaseView):
     def channel_back_hook(self, clicked):
         if clicked and clicked[0] == "ch_prev":
             self.rm.reset()
-            view = ChannelsView(self.rm, self.current_view, {"base":(self.page-1)*34, "current_server": self.current_server})
+            view = ChannelsView(self.rm, self.current_view, {"page":(self.page-1), "current_server": self.current_server})
             
             self.current_view.clear()
             self.current_view.append(view)
