@@ -1,18 +1,20 @@
 import argparse
 import os
+
+from myapp.views.guilds import GuildsView
+from myapp.views.login import LoginView
 from .config import Config
-from .scenes import logged_in, not_logged_in
 
-from carta import ReMarkable, Widget
+from carta import ReMarkable
 
 
-def quit_hook(rm: ReMarkable, clicked, config: Config):
+def quit_hook(clicked):
     print(clicked)
     if clicked and clicked[0] == "back":
             print("Quitting...")
             return "exit"
 
-click_hooks = [quit_hook]
+
 
 def main():
     config = Config()
@@ -32,18 +34,26 @@ def main():
     rm = ReMarkable(simple=args.simple) if args.simple is not None else ReMarkable()
 
     rm.eclear()
-
+    current_view = []
     if not config.is_logged_in():
-        not_logged_in(rm, click_hooks, config)
+        current_view.clear()
+        view = LoginView(rm, current_view)
+        view.display()
+        current_view.append(view)
+        
     else:
-        logged_in(rm, click_hooks, config)
+        current_view.clear()
+        view = GuildsView(rm, current_view)
+        view.display()
+        current_view.append(view)
 
     while True:
         print("_________________________________________")
-        print(click_hooks)
+
         clicked = rm.display()
-    
-        for hook in click_hooks:
-            print("Calling "+ hook.__name__)
-            hook(rm, clicked, config)
+        rm.screen
+        quit_hook(clicked)
+        
+        current_view[0].handle_buttons(clicked)
+        __import__("time").sleep(2)
 

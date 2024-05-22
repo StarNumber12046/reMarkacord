@@ -31,7 +31,7 @@ help:
 define SCRIPT
 #!/bin/sh
 . .venv/bin/activate
-exec python myapp.py --simple-executable=.rmkit/src/build/simple
+exec python reMarkacord.py --simple-executable=.rmkit/src/build/simple
 endef
 export SCRIPT
 

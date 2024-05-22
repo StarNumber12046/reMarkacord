@@ -18,6 +18,6 @@ sha256sums=(
 )
 
 package() {
-    install -D -m 755 -t "$pkgdir"/opt/bin/ "$srcdir"/myapp.bin
+    install -D -m 755 -t "$pkgdir"/opt/bin/ "$srcdir"/reMarkacord.bin
     install -D -m 655 -t "$pkgdir"/opt/etc/draft/ "$srcdir"/remarkacord.draft
 }
