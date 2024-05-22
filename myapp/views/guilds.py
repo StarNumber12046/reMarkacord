@@ -55,6 +55,18 @@ class GuildsView(BaseView):
     
     def display(self):
         super().display()
+        
+        self.rm.add(
+            Widget(
+                id="exit",
+                typ="button",
+                value="Exit",
+                justify="right",
+                x="95%",
+                y="10",
+            )
+        )
+        
         title = Widget(
             id="title",
             typ="label",
@@ -129,7 +141,6 @@ class GuildsView(BaseView):
         client = Client(Config().get("DISCORD_TOKEN"))
         
         for server in self.all_servers:
-            
             if clicked and f'guild_{server.id}' == clicked[0]:
                 print("Hi!")
                 self.current_server = server.id

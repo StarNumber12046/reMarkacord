@@ -92,9 +92,17 @@ class ChannelsView(BaseView):
     def display(self):
         super().display()
         base: int = self.additional_args["base"]
-        __import__("os").system("notify-send 'base: " + str(base) + "'")
-        print(f"{self.additional_args} LULZ")
-        print(f"{base=}")
+        
+        self.rm.add(
+            Widget(
+                id="back",
+                typ="button",
+                value="<= Back",
+                justify="right",
+                x="95%",
+                y="10",
+            )
+        )
         
         client = Client(Config().get("DISCORD_TOKEN"))
         self.page = self.additional_args.get("page", 1)
@@ -139,7 +147,7 @@ class ChannelsView(BaseView):
             return None
     
     def go_back(self, clicked):
-        if clicked and clicked[0] == "channel_back":
+        if clicked and clicked[0] == "back":
             guilds_mod = importlib.import_module("myapp.views.guilds")
             self.rm.reset()
             view = guilds_mod.GuildsView(self.rm, self.current_view)

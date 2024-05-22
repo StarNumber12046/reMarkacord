@@ -1,6 +1,9 @@
 from .base import BASE_URL, HEADERS
 import requests
 
+SERVERS_CACHE = []
+CHANNELS_CACHE = {}
+
 class Guild(object):
     def __init__(self, id, name) -> None:
         self.id = id
@@ -15,23 +18,32 @@ class Message(object):
 class Client(object):
     def __init__(self, token) -> None:
         self.token = token
+ 
     
     def get_servers(self):
+        if len(SERVERS_CACHE) > 0:
+            return SERVERS_CACHE
         response = requests.get(f"{BASE_URL}/users/@me/guilds", headers=HEADERS | {"authorization": self.token})
         json_response = response.json()
         if response.status_code != 200:
             print(json_response)
             raise RuntimeError("Failed to get servers")
-        return [Guild(item["id"], item["name"]) for item in json_response]
+        SERVERS_CACHE.extend([Guild(item["id"], item["name"]) for item in json_response])
+        return SERVERS_CACHE
+        
     
     def get_channels(self, guild_id):
+        if guild_id in CHANNELS_CACHE.keys():
+            return CHANNELS_CACHE[guild_id]
+        print("Getting channels")
         print(guild_id)
         response = requests.get(f"{BASE_URL}/guilds/{guild_id}/channels", headers=HEADERS | {"authorization": self.token})
         json_response = response.json()
+        CHANNELS_CACHE[guild_id] = [{"id": item["id"], "name": item["name"]} for item in json_response if item['type'] == 0]
         if response.status_code != 200:
             print(json_response)
             raise RuntimeError("Failed to get channels")
-        return [{"id": item["id"], "name": item["name"]} for item in json_response if item['type'] == 0]
+        return CHANNELS_CACHE[guild_id]
     
     def get_messages(self, channel_id):
         response = requests.get(f"{BASE_URL}/channels/{channel_id}/messages?limit=50", headers=HEADERS | {"authorization": self.token})

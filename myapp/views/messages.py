@@ -98,7 +98,18 @@ class MessagesView(BaseView):
         
         self.page = page
         self.paginate(len(self.pages), self.page)
-
+        
+        self.rm.add(
+            Widget(
+                id="back",
+                typ="button",
+                value="Back",
+                justify="right",
+                x="95%",
+                y="10",
+            )
+        )
+        
         last_height = 300
         new_msgbar = Widget(
             id="new_msgbar",
@@ -154,7 +165,7 @@ class MessagesView(BaseView):
             return None
     
     def go_back(self, clicked):
-        if clicked and clicked[0] == "message_back":
+        if clicked and clicked[0] == "back":
             channels_mod = importlib.import_module("myapp.views.channels")
             self.rm.reset()
             view = channels_mod.ChannelsView(self.rm, self.current_view, additional_args={"current_server": self.additional_args["current_server"]})
