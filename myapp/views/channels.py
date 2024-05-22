@@ -32,7 +32,7 @@ class ChannelsView(BaseView):
         current_page = []
         total_height = 0
         for channel in channels:
-            text = f"{channel["name"]}"
+            text = f"{channel['name']}"
             if total_height + 30 > 1400:
                 pages_list.append(current_page)
                 current_page = []

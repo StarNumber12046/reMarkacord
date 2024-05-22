@@ -22,7 +22,7 @@ jobs:
         uses: Eeems-Org/remarkable-nuitka-build-action@v2
         with:
           main: reMarkacord.py
-          python_version: '3.12'
+          python_version: '3.10'
       - uses: actions/upload-artifact@v3
         with:
           name: myapp
