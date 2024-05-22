@@ -8,7 +8,6 @@ from carta import ReMarkable, Widget
 
 class ChannelsView(BaseView):
     def __init__(self, reMarkable: ReMarkable, current_view: list[callable], additional_args: dict = {}) -> None:
-        print(f"{additional_args=}")
         if not "base" in additional_args.keys():
             additional_args["base"] = 1
         if not "current_server" in additional_args.keys():
@@ -107,7 +106,6 @@ class ChannelsView(BaseView):
         client = Client(Config().get("DISCORD_TOKEN"))
         self.page = self.additional_args.get("page", 1)
         channels = self.pages[self.page-1]
-        print("Channels n°", len(channels))
         self.paginate(len(self.pages), self.page)
         height = 100
         for channel in channels:
@@ -125,9 +123,7 @@ class ChannelsView(BaseView):
             )
     
     def channel_next_hook(self, clicked):
-        print(clicked)
         if clicked and clicked[0] == "ch_next":
-            print("Hi *4!")
             self.rm.reset()
             
             view = ChannelsView(self.rm, self.current_view, {"page":(self.page+1), "current_server": self.current_server})

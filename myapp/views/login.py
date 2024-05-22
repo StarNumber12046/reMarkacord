@@ -11,7 +11,6 @@ class LoginView(BaseView):
     
 
     def display(self):
-        print("Hi!")
         super().display()
         title = Widget(
             id="title",

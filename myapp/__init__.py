@@ -13,9 +13,8 @@ from carta import ReMarkable
 
 
 def quit_hook(clicked):
-    print(clicked)
+    
     if clicked and clicked[0] == "exit":
-            print("Quitting...")
             return "exit"
 
 
@@ -63,7 +62,6 @@ def main():
         current_view.append(view)
 
     while True:
-        print("_________________________________________")
         try:
             clicked = rm.display()
 

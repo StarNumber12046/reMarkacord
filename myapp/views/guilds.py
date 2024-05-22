@@ -78,8 +78,6 @@ class GuildsView(BaseView):
         )
         
         base: int = self.additional_args["base"]
-        print(f"{self.additional_args} LULZ")
-        print(f"{base=}")
         self.rm.add(title)
         self.hooks.append(self.server_click_hook)
         self.hooks.append(self.server_next_hook)
@@ -128,8 +126,6 @@ class GuildsView(BaseView):
             )
     
     def server_click_hook(self, clicked: tuple):
-        print("Running server_click. ")
-        print(clicked)
         self.rm.reset()
         # THIS CODE IS BUGGED
         # for item in rm.screen:
@@ -142,7 +138,6 @@ class GuildsView(BaseView):
         
         for server in self.all_servers:
             if clicked and f'guild_{server.id}' == clicked[0]:
-                print("Hi!")
                 self.current_server = server.id
 
                 view = ChannelsView(self.rm, self.current_view, {"current_server": self.current_server})
@@ -155,9 +150,7 @@ class GuildsView(BaseView):
     
 
     def server_next_hook(self, clicked):
-        print(clicked)
         if clicked and clicked[0] == "next":
-            print("Hi *2!")
             self.rm.reset()
             
             view = GuildsView(self.rm, self.current_view, {"base":(self.page+1)*34})

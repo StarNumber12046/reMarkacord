@@ -8,7 +8,6 @@ from carta import ReMarkable, Widget
 
 class MessagesView(BaseView):
     def __init__(self, reMarkable: ReMarkable, current_view: list[callable], additional_args: dict = {}) -> None:
-        print(f"{additional_args=}")
         if not "base" in additional_args.keys():
             additional_args["base"] = 1
         if not "current_channel" in additional_args.keys():
@@ -142,7 +141,6 @@ class MessagesView(BaseView):
     def send_message_hook(self, clicked):
 
         if clicked and clicked[0].strip() == "new_msgbar":
-            print("Sending message...")
             self.rm.reset()
             self.client.send_message(self.current_channel, clicked[1])
             view = MessagesView(self.rm, self.current_view, additional_args={"current_channel": self.current_channel, "current_server": self.additional_args["current_server"], "page": 1})
