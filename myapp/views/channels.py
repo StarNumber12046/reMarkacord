@@ -20,12 +20,31 @@ class ChannelsView(BaseView):
         self.hooks.append(self.channel_next_hook)
         self.hooks.append(self.go_back)
         self.hooks.append(self.channel_click_hook)
-        self.page = 0
-        # self.hooks.append(channel_click_hook)
-        # self.hooks.append(channel_page_hook)
+        self.page = 1
+        self.hooks.append(self.go_back)
+        self.client = Client(Config().get("DISCORD_TOKEN"))
+        self.channels = self.client.get_channels(self.current_server)
+        self.pages = self.generate_pages(self.channels)
 
+    def generate_pages(self, channels):
+        max_channels_per_page = 33
+        pages_list = []
+        current_page = []
+        total_height = 0
+        for channel in channels:
+            text = f"{channel["name"]}"
+            if total_height + 30 > 1400:
+                pages_list.append(current_page)
+                current_page = []
+                total_height = 0
+            current_page.append((text, channel["id"]))
+            total_height += 30
+        if current_page:
+            pages_list.append(current_page)
+        return pages_list
+    
     def paginate(self, pages, page):
-        if page != 0:
+        if page != 1:
             self.rm.add(
                 Widget(
                     id="ch_prev",
@@ -52,7 +71,7 @@ class ChannelsView(BaseView):
                 Widget(
                     id="page",
                     typ="label",
-                    value=f"Page {page+1}/{pages+1}",
+                    value=f"Page {page}/{pages}",
                     justify="right",
                     x="50%",
                     y="100%",
@@ -78,28 +97,21 @@ class ChannelsView(BaseView):
         print(f"{base=}")
         
         client = Client(Config().get("DISCORD_TOKEN"))
-        channel_list = client.get_channels(self.current_server)
-        max_channels = len(channel_list)
-        num_channels_per_page = 34
-        pages = max_channels // num_channels_per_page
-        self.page = trunc(self.base / num_channels_per_page)
-        if self.base + num_channels_per_page > max_channels:
-            channels = channel_list[self.base:]
-        else:
-            channels = channel_list[self.base:self.base+num_channels_per_page]
+        self.page = self.additional_args.get("page", 1)
+        channels = self.pages[self.page-1]
         
-        self.paginate(pages, self.page)
+        self.paginate(len(self.pages), self.page)
 
         for channel in channels:
             self.rm.add(
                 Widget(
-                    id=f"channel_{channel['id']}",
+                    id=f"channel_{channel[1]}",
                     typ="button",
                     justify="center",
                     x="50%",
                     y=f"{100+50*channels.index(channel)}",
                     fontsize="30",
-                    value=channel["name"],
+                    value=channel[0],
                 )
             )
         base_widget =             Widget(
