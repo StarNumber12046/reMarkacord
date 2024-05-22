@@ -13,16 +13,40 @@ class MessagesView(BaseView):
             additional_args["base"] = 1
         if not "current_channel" in additional_args.keys():
             raise ValueError("current_channel not in additional_args")
+        if not "current_server" in additional_args.keys():
+            raise ValueError("current_server not in additional_args")
         super().__init__(reMarkable, current_view, additional_args)
         self.base = self.additional_args["base"]
         self.current_channel = self.additional_args["current_channel"]
         self.hooks.append(self.message_back_hook)
+        self.page = 1
         self.hooks.append(self.message_next_hook)
         self.hooks.append(self.go_back)
-        self.page = 0
+        self.client = Client(Config().get("DISCORD_TOKEN"))
+        self.messages = self.client.get_messages(self.current_channel)
+        self.pages = self.generate_pages(self.messages)
 
+    def generate_pages(self, messages):
+        max_messages_per_page = (1400-100)//50
+        pages_list = []
+        current_page = []
+        total_height = 0
+        for message in messages:
+            text = f"@{message.author_username}: {message.content}"
+            lines = textwrap.wrap(text, width=1400//30)
+            height = len(lines)*30
+            if total_height + height > 1400:
+                pages_list.append(current_page)
+                current_page = []
+                total_height = 0
+            current_page.append(lines)
+            total_height += height
+        if current_page:
+            pages_list.append(current_page)
+        return pages_list
+    
     def paginate(self, pages, page):
-        if page != 0:
+        if page != 1:
             self.rm.add(
                 Widget(
                     id="msg_prev",
@@ -49,7 +73,7 @@ class MessagesView(BaseView):
                 Widget(
                     id="page",
                     typ="label",
-                    value=f"Page {page+1}/{pages+1}",
+                    value=f"Page {page}/{pages}",
                     justify="right",
                     x="50%",
                     y="100%",
@@ -69,77 +93,47 @@ class MessagesView(BaseView):
 
     def display(self):
         super().display()
-        base: int = self.additional_args["base"]
-        __import__("os").system("notify-send 'base: " + str(base) + "'")
-        print(f"{self.additional_args} LULZ")
-        print(f"{base=}")
+        page = self.additional_args.get("page", 1)
+        messages_for_page = self.pages[page-1]
         
-        client = Client(Config().get("DISCORD_TOKEN"))
-        message_list = client.get_messages(self.current_channel)
-        max_messages = len(message_list)
-        num_messages_per_page = 34
-        pages = max_messages // num_messages_per_page
-        self.page = trunc(self.base / num_messages_per_page)
-        if self.base + num_messages_per_page > max_messages:
-            messages = message_list[self.base:]
-        else:
-            messages = message_list[self.base:self.base+num_messages_per_page]
-        
-        self.paginate(pages, self.page)
+        self.page = page
+        self.paginate(len(self.pages), self.page)
 
-        message_height = 100
-        for message in messages:
-            text = f"@{message.author_username}: {message.content}"
-            lines = textwrap.wrap(text, width=1400//30)
-            height = len(lines)*50
-            last_height = message_height
-            message_height = last_height + 30
-            line_height = message_height
-            for index, line in enumerate(lines):
-                prev_line_height = line_height
-                line_height = prev_line_height + 30
-                print("Line " + line + "\n Height: " + f"{line_height}")
+        last_height = 100
+        for msg_index, message in enumerate(messages_for_page):
+
+            for index, line in enumerate(message):
+                last_height += 30
                 self.rm.add(
                     Widget(
-                        id=f"message_{message.id}_{index}",
+                        id=f"message_{msg_index}_{index}",
                         typ="label",
                         justify="left",
                         x="10",
-                        y=f"{line_height}",
+                        y=f"{last_height}",
                         fontsize="30",
                         value=line,
                     )
                 )
-                message_height = line_height
-            
-        max_messages_per_page = (1400-100)//50
-        pages = (max_messages + max_messages_per_page - 1) // max_messages_per_page
+            last_height += 10
 
-        self.rm.add(
-            Widget(
-                id="message_back",
-                typ="button",
-                value="<=",
-                justify="left",
-                x=f"{1404-50}",
-                y=f"10", # At the end of the list
-            )
-        )
+
     
     def message_next_hook(self, clicked):
         if clicked and clicked[0] == "msg_next":
             self.rm.reset()
             
-            view = MessagesView(self.rm, self.current_view, {"base":(self.page+1)*34, "current_channel": self.current_channel})
+            view = MessagesView(self.rm, self.current_view, {"page":self.page+1, "current_channel": self.current_channel, "current_server": self.additional_args["current_server"]})
             self.current_view.clear()
             self.current_view.append(view)
             view.display()
             return None
     
     def message_back_hook(self, clicked):
+        
         if clicked and clicked[0] == "msg_prev":
             self.rm.reset()
-            view = MessagesView(self.rm, self.current_view, {"base":(self.page-1)*34, "current_channel": self.current_channel})
+            view = MessagesView(self.rm, self.current_view, {"page":self.page-1, "current_channel": self.current_channel, "current_server": self.additional_args["current_server"]})
             
             self.current_view.clear()
             self.current_view.append(view)
@@ -150,7 +144,7 @@ class MessagesView(BaseView):
         if clicked and clicked[0] == "message_back":
             channels_mod = importlib.import_module("myapp.views.channels")
             self.rm.reset()
-            view = channels_mod.ChannelsView(self.rm, self.current_view)
+            view = channels_mod.ChannelsView(self.rm, self.current_view, additional_args={"current_server": self.additional_args["current_server"]})
             self.current_view.clear()
             self.current_view.append(view)
             view.display()
