@@ -31,6 +31,15 @@ class Client(object):
         SERVERS_CACHE.extend([Guild(item["id"], item["name"]) for item in json_response])
         return SERVERS_CACHE
         
+    def can_read_channel(self, overwrites):
+        for overwrite in overwrites:
+            if int(overwrite["allow"]) & (1 << 10) == 1<<10:
+                return True
+            if int(overwrite["deny"]) & (1 << 10) == 1<<10:
+                return False
+        return True
+        
+        
     
     def get_channels(self, guild_id):
         if guild_id in CHANNELS_CACHE.keys():
@@ -38,7 +47,7 @@ class Client(object):
 
         response = requests.get(f"{BASE_URL}/guilds/{guild_id}/channels", headers=HEADERS | {"authorization": self.token})
         json_response = response.json()
-        CHANNELS_CACHE[guild_id] = [{"id": item["id"], "name": item["name"]} for item in json_response if item['type'] == 0]
+        CHANNELS_CACHE[guild_id] = [{"id": item["id"], "name": item["name"]} for item in json_response if item['type'] == 0 and self.can_read_channel(item["permission_overwrites"])]
         if response.status_code != 200:
 
             raise RuntimeError("Failed to get channels")

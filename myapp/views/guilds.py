@@ -3,6 +3,7 @@ from myapp.config import Config
 from myapp.minicord.classes import Client
 from myapp.views.base import BaseView
 from carta import ReMarkable, Widget
+import time
 
 from myapp.views.channels import ChannelsView
 
@@ -12,14 +13,35 @@ class GuildsView(BaseView):
         self, reMarkable: ReMarkable, current_view: list, additional_args: dict = {}
     ) -> None:
         super().__init__(reMarkable, current_view, additional_args)
-        if not "base" in additional_args.keys():
-            additional_args["base"] = 0
+        self.page = 1
+
+        self.client = Client(Config().get("DISCORD_TOKEN"))
+        self.guilds = self.client.get_servers()
+        self.pages = self.generate_pages(self.guilds)
         
     def handle_buttons(self, clicked: tuple):
         return super().handle_buttons(clicked)
     
+    def generate_pages(self, guilds):
+        max_channels_per_page = 33
+        pages_list = []
+        current_page = []
+        total_height = 0
+        for guild in guilds:
+            text = f"{guild.name}"
+            if total_height + 50 > 1650:
+                pages_list.append(current_page)
+                current_page = []
+                total_height = 0
+            current_page.append((text, guild.id))
+            total_height += 50
+        if current_page:
+            pages_list.append(current_page)
+        return pages_list
+    
+    
     def paginate(self, pages, page):
-        if page != 0:
+        if page != 1:
             self.rm.add(
                 Widget(
                     id="prev",
@@ -46,7 +68,7 @@ class GuildsView(BaseView):
                 Widget(
                     id="page",
                     typ="label",
-                    value=f"Page {page+1}/{pages+1}",
+                    value=f"Page {page}/{pages}",
                     justify="right",
                     x="50%",
                     y="100%",
@@ -54,8 +76,7 @@ class GuildsView(BaseView):
             )
     
     def display(self):
-        super().display()
-        
+        self.page = self.additional_args.get("page", 1)
         self.rm.add(
             Widget(
                 id="exit",
@@ -77,30 +98,19 @@ class GuildsView(BaseView):
             fontsize="50",
         )
         
-        base: int = self.additional_args["base"]
+
         self.rm.add(title)
         self.hooks.append(self.server_click_hook)
         self.hooks.append(self.server_next_hook)
         self.hooks.append(self.server_back_hook)
 
         client = Client(Config().get("DISCORD_TOKEN"))
+        print(self.page-1)
+        print(len(self.pages))
+        page = self.pages[self.page - 1]
 
-        self.all_servers = client.get_servers()
-        max_servers = len(self.all_servers)
-        num_servers_per_page = 34
-        pages = max_servers // num_servers_per_page
-        self.page = trunc(base / num_servers_per_page)
-        if base + num_servers_per_page > max_servers:
-            servers = self.all_servers[base:]
-        else:
-            servers = self.all_servers[base : base + num_servers_per_page]
-
-        servers = [
-            {"name": server.name, "id": server.id, "channels": []}
-            for server in self.all_servers[base : base + 34]
-        ]
         
-        self.paginate(pages, self.page)
+        self.paginate(len(self.pages), self.page)
         self.rm.add(
             Widget(
                 id="guilds",
@@ -112,31 +122,28 @@ class GuildsView(BaseView):
                 value="Choose a server...",
             )
         )
-        for index, server in enumerate(servers):
+        height = 100
+        for index, server in enumerate(page):
+            height += 50
             self.rm.add(
                 Widget(
-                    id=f"guild_{server['id']}",
+                    id=f"guild_{server[1]}",
                     typ="button",
                     justify="center",
                     x="50%",
-                    y=f"{50*index + 100}",
+                    y=f"{height}",
                     fontsize="30",
-                    value=server["name"],
+                    value=server[0],
                 )
             )
     
     def server_click_hook(self, clicked: tuple):
         self.rm.reset()
-        # THIS CODE IS BUGGED
-        # for item in rm.screen:
-        #     print(item.id)
-        #     if item.id.startswith("guild_"):
-        #         rm.remove(item.id)
-        
+
         
         client = Client(Config().get("DISCORD_TOKEN"))
         
-        for server in self.all_servers:
+        for server in self.guilds:
             if clicked and f'guild_{server.id}' == clicked[0]:
                 self.current_server = server.id
 
@@ -153,8 +160,8 @@ class GuildsView(BaseView):
         if clicked and clicked[0] == "next":
             self.rm.reset()
             
-            view = GuildsView(self.rm, self.current_view, {"base":(self.page+1)*34})
             self.current_view.clear()
+            view = GuildsView(self.rm, self.current_view, additional_args={"page":(self.page+1)})
             self.current_view.append(view)
             view.display()
             return None
@@ -162,9 +169,8 @@ class GuildsView(BaseView):
     def server_back_hook(self, clicked):
         if clicked and clicked[0] == "prev":
             self.rm.reset()
-            view = GuildsView(self.rm, self.current_view, {"base":(self.page-1)*34})
-            
             self.current_view.clear()
+            view = GuildsView(self.rm, self.current_view, additional_args={"page":(self.page-1)})
             self.current_view.append(view)
             view.display()
             return None
