@@ -140,13 +140,16 @@ class MessagesView(BaseView):
             last_height += 10
 
     def send_message_hook(self, clicked):
-        print("EEEEEEE")
+
         if clicked and clicked[0].strip() == "new_msgbar":
             print("Sending message...")
-            print(self.client.send_message(self.current_channel, clicked[1]))
             self.rm.reset()
-            self.additional_args["page"] = 1
-            self.display()
+            self.client.send_message(self.current_channel, clicked[1])
+            view = MessagesView(self.rm, self.current_view, additional_args={"current_channel": self.current_channel, "current_server": self.additional_args["current_server"], "page": 1})
+            self.current_view.clear()
+            self.current_view.append(view)
+            view.display()
+            return None
     
     def message_next_hook(self, clicked):
         if clicked and clicked[0] == "msg_next":
