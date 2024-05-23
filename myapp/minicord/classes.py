@@ -4,6 +4,7 @@ import requests
 SERVERS_CACHE = []
 CHANNELS_CACHE = {}
 SERVER_PROFILES_CACHE = {}
+DMS_CACHE = []
 
 
 class Guild(object):
@@ -16,6 +17,9 @@ class Message(object):
         self.id = id
         self.content = content
         self.author_username = user["username"]
+
+
+
 
 class Client(object):
     def __init__(self, token) -> None:
@@ -62,8 +66,6 @@ class Client(object):
                 if int(overwrite["deny"]) & (1 << 10) == 1<<10:
                     return False
         return True
-        
-        
     
     def get_channels(self, guild_id):
         if guild_id in CHANNELS_CACHE.keys():
@@ -76,6 +78,22 @@ class Client(object):
 
             raise RuntimeError("Failed to get channels")
         return CHANNELS_CACHE[guild_id]
+    
+    def get_dms(self):
+        if len(DMS_CACHE) > 0:
+            return DMS_CACHE
+        response = requests.get(f"{BASE_URL}/users/@me/channels", headers=HEADERS | {"authorization": self.token})
+        json_response = response.json()
+        if response.status_code != 200:
+            raise RuntimeError("Failed to get dms")
+        formatted_dms = []
+        for item in json_response:
+            if item["type"] == 1:
+                formatted_dms.append({"id": item["id"], "name": item["recipients"][0]["username"]})
+            if item["type"] == 3:
+                formatted_dms.append({"id": item["id"], "name": item["name"]})
+        DMS_CACHE.extend(formatted_dms)
+        return DMS_CACHE
     
     def get_messages(self, channel_id):
         response = requests.get(f"{BASE_URL}/channels/{channel_id}/messages?limit=50", headers=HEADERS | {"authorization": self.token})

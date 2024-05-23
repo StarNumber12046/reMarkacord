@@ -1,11 +1,12 @@
 from math import trunc
 from myapp.config import Config
-from myapp.minicord.classes import Client
+from myapp.minicord.classes import Client, Guild
 from myapp.views.base import BaseView
 from carta import ReMarkable, Widget
 import time
 
 from myapp.views.channels import ChannelsView
+from myapp.views.dms import DMsView
 
 
 class GuildsView(BaseView):
@@ -17,7 +18,7 @@ class GuildsView(BaseView):
 
         self.client = Client(Config().get("DISCORD_TOKEN"))
         self.guilds = self.client.get_servers()
-        self.pages = self.generate_pages(self.guilds)
+        self.pages = self.generate_pages([Guild(id="dms", name="Direct Messages")] + self.guilds)
         
     def handle_buttons(self, clicked: tuple):
         return super().handle_buttons(clicked)
@@ -142,7 +143,13 @@ class GuildsView(BaseView):
 
         
         client = Client(Config().get("DISCORD_TOKEN"))
-        
+        if clicked and clicked[0] == "guild_dms":
+            self.current_server = "dms"
+
+            view = DMsView(self.rm, self.current_view)
+            self.current_view.clear()
+            self.current_view.append(view)
+            view.display()
         for server in self.guilds:
             if clicked and f'guild_{server.id}' == clicked[0]:
                 self.current_server = server.id

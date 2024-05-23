@@ -167,6 +167,14 @@ class MessagesView(BaseView):
     
     def go_back(self, clicked):
         if clicked and clicked[0] == "back":
+            if self.additional_args["current_server"] == "dms":
+                dms_mod = importlib.import_module("myapp.views.dms")
+                self.rm.reset()
+                view = dms_mod.DMsView(self.rm, self.current_view)
+                self.current_view.clear()
+                self.current_view.append(view)
+                view.display()
+                return
             channels_mod = importlib.import_module("myapp.views.channels")
             self.rm.reset()
             view = channels_mod.ChannelsView(self.rm, self.current_view, additional_args={"current_server": self.additional_args["current_server"]})
