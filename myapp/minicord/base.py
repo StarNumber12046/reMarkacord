@@ -11,6 +11,7 @@ HEADERS = {
     "x-debug-options": "bugReporterEnabled",
     "x-discord-locale": "en-GB",
     "x-discord-timezone": "Europe/Rome",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9205 Chrome/134.0.6998.205 Electron/35.3.0 Safari/537.36"
 }
 
 BASE_URL = "https://discord.com/api/v9"
