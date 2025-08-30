@@ -23,7 +23,7 @@ jobs:
         with:
           main: reMarkacord.py
           python_version: '3.10'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: myapp
           path: dist/reMarkacord.bin
@@ -34,19 +34,19 @@ jobs:
     needs: [build]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         id: download
         with:
           name: myapp
       - name: Build package
         uses: toltec-dev/build-action@v1
       - name: Save packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: packages
           path: dist/rm*/*.ipk
       - name: Save repo
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rmall
           path: dist/rmall
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [package]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         id: download
         with:
           name: rmall
