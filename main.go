@@ -2,12 +2,23 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/StarNumber12046/reMarkacord/appload"
+)
+
+const (
+	GetChannelsRequest = 10
+	GetMessagesRequest = 11
+	SendMessageRequest = 12
+
+	GetChannelsResponse = 110
+	GetMessagesResponse = 111
+	SendMessageResponse = 112
 )
 
 type Config struct {
@@ -65,6 +76,41 @@ func (db *DiscordBackend) HandleMessage(replier *appload.BackendReplier, message
 	if message.MsgType > 1000 {
 		replier.SendMessage(200, "Init")
 	}
+
+	switch message.MsgType {
+	case GetChannelsRequest:
+		db.handleGetChannels(replier)
+	case GetMessagesRequest:
+		db.handleGetMessages(replier, message.Contents)
+	case SendMessageRequest:
+		db.handleSendMessage(replier, message.Contents)
+	}
+}
+
+func (db *DiscordBackend) handleGetChannels(replier *appload.BackendReplier) {
+	// Stub: return list of channels
+	channels := []map[string]string{
+		{"id": "1", "name": "general"},
+		{"id": "2", "name": "random"},
+	}
+	data, _ := json.Marshal(channels)
+	replier.SendMessage(GetChannelsResponse, string(data))
+}
+
+func (db *DiscordBackend) handleGetMessages(replier *appload.BackendReplier, channelID string) {
+	// Stub: return messages for channel
+	messages := []map[string]string{
+		{"id": "100", "content": "Hello world", "author": "Alice"},
+		{"id": "101", "content": "Hi Alice", "author": "Bob"},
+	}
+	data, _ := json.Marshal(messages)
+	replier.SendMessage(GetMessagesResponse, string(data))
+}
+
+func (db *DiscordBackend) handleSendMessage(replier *appload.BackendReplier, content string) {
+	// Stub: echo back success
+	fmt.Printf("Sending message: %s\n", content)
+	replier.SendMessage(SendMessageResponse, "Message sent")
 }
 
 func main() {
