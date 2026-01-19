@@ -1,0 +1,8 @@
+{
+    "name": "reMarkacord",
+    "loadsBackend": true,
+    "entry": "/ui/ui.qml",
+    "id": "reMarkacord",
+    "supportsScaling": true,
+    "canHaveMultipleFrontends": true
+}
